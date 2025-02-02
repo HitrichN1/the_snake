@@ -69,6 +69,7 @@ class Apple(GameObject):
         self.respawn()
         # Метод draw класса Apple
         super().draw()
+        self.position
 
     def respawn(self):
         """Перемещает яблоко в случайную позицию на поле."""
