@@ -66,12 +66,11 @@ class Apple(GameObject):
 
     def __init__(self):
         super().__init__(APPLE_COLOR)
-        self.respawn()
+        self.randomize_position()
         # Метод draw класса Apple
         super().draw()
-        self.position
 
-    def respawn(self):
+    def randomize_position(self):
         """Перемещает яблоко в случайную позицию на поле."""
         self.position = (
             random.randint(0, GRID_WIDTH - 1) * GRID_SIZE,
@@ -190,14 +189,14 @@ def main():
 
         # Проверка, съела ли змейка яблоко
         if snake.positions[0] == apple.position:
-            apple.respawn()
+            apple.randomize_position()
             # Увеличиваем длину змейки
             snake.length += 1
 
         # Проверка столкновения с собой
         if snake.check_collision():
             snake.reset()
-            apple.respawn()
+            apple.randomize_position()
 
         # Отрисовка объектов.
         screen.fill(BOARD_BACKGROUND_COLOR)
