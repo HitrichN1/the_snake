@@ -72,8 +72,15 @@ class Snake(GameObject):
 
     def __init__(self):
         super().__init__(SNAKE_COLOR)
-        # Длина змейки
+        self.reset()
         self.length = 2
+
+    def get_head_position(self):
+        """Возвращает позицию головы змейки."""
+        return self.positions[0]
+
+    def reset(self):
+        """Сбрасывает состояние змейки."""
         # Начальная позиция
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
         # Начальное направление
@@ -82,10 +89,8 @@ class Snake(GameObject):
         self.next_direction = None
         # Последний сегмент змейки
         self.last = None
-
-    def get_head_position(self):
-        """Возвращает позицию головы змейки."""
-        return self.positions[0]
+        # Возвращаем длину змейки
+        self.length = 2
 
     # Метод draw класса Snake
     def draw(self):
@@ -171,7 +176,7 @@ def main():
 
         # Проверка столкновения с собой
         if snake.check_collision():
-            reset(Snake)
+            snake.reset()
             apple.respawn()
 
         # Отрисовка объектов
