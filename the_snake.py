@@ -1,3 +1,4 @@
+
 import pygame
 
 import random
@@ -45,6 +46,7 @@ class GameObject:
     Базовый класс для игровых объектов.
     Определяет цвет и позицию объекта, а также метод его отрисовки.
     """
+
     def __init__(self, body_color=(0, 0, 0)):
         self.body_color = body_color
         self.position = (0, 0)
@@ -61,6 +63,7 @@ class Apple(GameObject):
     Класс, представляющий яблоко на игровом поле.
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
+
     def __init__(self):
         super().__init__(APPLE_COLOR)
         self.respawn()
@@ -81,6 +84,7 @@ class Snake(GameObject):
     Змейка двигается по полю, увеличивается при поедании яблок и
     может столкнуться с самой собой.
     """
+
     def __init__(self):
         super().__init__(SNAKE_COLOR)
         self.reset()
@@ -161,6 +165,11 @@ def handle_keys(game_object):
 
 
 def main():
+    """
+    Основная функция игры.
+    Инициализирует игру и запускает основной игровой цикл.
+    """
+    
     # Инициализация PyGame:
     pygame.init()
     # Тут нужно создать экземпляры классов
