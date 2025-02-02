@@ -41,7 +41,10 @@ clock = pygame.time.Clock()
 
 # Тут опишите все классы игры.
 class GameObject:
-    """Родительский класс"""
+    """
+    Базовый класс для игровых объектов.
+    Определяет цвет и позицию объекта, а также метод его отрисовки.
+    """
     def __init__(self, body_color=(0, 0, 0)):
         self.body_color = body_color
         self.position = (0, 0)
@@ -54,7 +57,10 @@ class GameObject:
 
 
 class Apple(GameObject):
-
+    """
+    Класс, представляющий яблоко на игровом поле.
+    Яблоко появляется в случайной позиции и может быть съедено змейкой.
+    """
     def __init__(self):
         super().__init__(APPLE_COLOR)
         self.respawn()
@@ -70,7 +76,11 @@ class Apple(GameObject):
 
 
 class Snake(GameObject):
-
+    """
+    Класс, представляющий змейку.
+    Змейка двигается по полю, увеличивается при поедании яблок и
+    может столкнуться с самой собой.
+    """
     def __init__(self):
         super().__init__(SNAKE_COLOR)
         self.reset()
