@@ -163,10 +163,10 @@ def handle_keys(game_object):
 def main():
     # Инициализация PyGame:
     pygame.init()
-    # Тут нужно создать экземпляры классов.
+    # Тут нужно создать экземпляры классов
     snake = Snake()
     apple = Apple()
-
+    # Основной цикл
     while True:
         clock.tick(SPEED)
 
@@ -190,7 +190,7 @@ def main():
             snake.reset()
             apple.respawn()
 
-        # Отрисовка объектов
+        # Отрисовка объектов.
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
         snake.draw()
