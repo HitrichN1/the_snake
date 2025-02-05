@@ -1,5 +1,4 @@
 import random
-
 import pygame as pg
 
 # Константы для размеров поля и сетки:
@@ -47,8 +46,9 @@ class GameObject:
         self.position = position
         self.body_color = body_color
 
-    def draw(self, position, color=None):
+    def draw(self, position=None, color=None):
         """Отрисовывает одну ячейку на поле."""
+        position = position if position else self.position
         color = color if color else self.body_color
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, color, rect)
@@ -87,7 +87,6 @@ class Snake(GameObject):
     def __init__(self, color=SNAKE_COLOR):
         super().__init__(body_color=color)
         self.reset()
-        self.body_color = color
         self.next_direction = self.direction
 
     def get_head_position(self):
@@ -109,7 +108,7 @@ class Snake(GameObject):
     def draw(self):
         """Отрисовывает змейку на экране."""
         for position in self.positions:
-            GameObject.draw(self, position, self.body_color)
+            super().draw(position)
 
     def update_direction(self, new_direction=None):
         """Обновляет направление змейки."""
@@ -212,7 +211,7 @@ def main():
 
         # Отрисовка объектов.
         screen.fill(BOARD_BACKGROUND_COLOR)
-        apple.draw(apple.position)
+        apple.draw()
         snake.draw()
         pg.display.update()
 
