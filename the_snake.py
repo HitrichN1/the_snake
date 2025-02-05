@@ -43,13 +43,11 @@ class GameObject:
     Определяет цвет и позицию объекта, а также метод его отрисовки.
     """
 
-    def __init__(self, position=(0, 0), body_color=(0, 0, 0)):
-        self.position = position
-        self.body_color = body_color
+    position = (0, 0)
+    body_color = (0, 0, 0)
 
-    def draw(self, position=None, color=None):
+    def draw(self, position, color=None):
         """Отрисовывает одну ячейку на поле."""
-        position = position if position else self.position
         color = color if color else self.body_color
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, color, rect)
@@ -63,8 +61,9 @@ class Apple(GameObject):
     """
 
     def __init__(self, occupied_positions, color=APPLE_COLOR):
-        super().__init__(body_color=color)
         self.randomize_position(occupied_positions)
+        self.body_color = color
+        self.position = self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_positions):
         """Перемещает яблоко в случайную позицию на поле."""
@@ -75,7 +74,7 @@ class Apple(GameObject):
             )
             if new_position not in occupied_positions:
                 self.position = new_position
-                break
+                return self.position
 
 
 class Snake(GameObject):
@@ -86,8 +85,8 @@ class Snake(GameObject):
     """
 
     def __init__(self, color=SNAKE_COLOR):
-        super().__init__(body_color=color)
         self.reset()
+        self.body_color = color
         self.next_direction = self.direction
 
     def get_head_position(self):
@@ -109,7 +108,7 @@ class Snake(GameObject):
     def draw(self):
         """Отрисовывает змейку на экране."""
         for position in self.positions:
-            super().draw(position)
+            GameObject.draw(self, position, self.body_color)
 
     def update_direction(self, new_direction=None):
         """Обновляет направление змейки."""
@@ -212,7 +211,7 @@ def main():
 
         # Отрисовка объектов.
         screen.fill(BOARD_BACKGROUND_COLOR)
-        apple.draw()
+        apple.draw(apple.position)
         snake.draw()
         pg.display.update()
 
