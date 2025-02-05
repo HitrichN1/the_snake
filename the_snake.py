@@ -136,33 +136,32 @@ class Snake(GameObject):
             return False
         return self.get_head_position() in self.positions[1:]
 
+    # Функция обработки действий пользователя
+    def handle_keys(self):
+        """Обрабатывает нажатия клавиш."""
+        global SPEED
+        key_mapping = {
+            pg.K_UP: UP,
+            pg.K_DOWN: DOWN,
+            pg.K_LEFT: LEFT,
+            pg.K_RIGHT: RIGHT
+        }
 
-# Функция обработки действий пользователя
-def handle_keys(Snake):
-    """Обрабатывает нажатия клавиш."""
-    global SPEED
-    key_mapping = {
-        pg.K_UP: UP,
-        pg.K_DOWN: DOWN,
-        pg.K_LEFT: LEFT,
-        pg.K_RIGHT: RIGHT
-    }
-
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            pg.quit()
-            raise SystemExit
-        if event.type == pg.KEYDOWN:
-            if event.key in key_mapping:
-                new_direction = key_mapping[event.key]
-                Snake.update_direction(new_direction)
-            elif event.key == pg.K_PAGEUP:  # Увеличиваем скорость
-                SPEED += 1
-            elif event.key == pg.K_PAGEDOWN:  # Уменьшаем скорость
-                SPEED = max(1, SPEED - 1)  # Минимальная скорость 1
-            elif event.key == pg.K_ESCAPE:  # Выход из игры
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
                 pg.quit()
                 raise SystemExit
+            if event.type == pg.KEYDOWN:
+                if event.key in key_mapping:
+                    new_direction = key_mapping[event.key]
+                    self.update_direction(new_direction)
+                elif event.key == pg.K_PAGEUP:  # Увеличиваем скорость
+                    SPEED += 1
+                elif event.key == pg.K_PAGEDOWN:  # Уменьшаем скорость
+                    SPEED = max(1, SPEED - 1)  # Минимальная скорость 1
+                elif event.key == pg.K_ESCAPE:  # Выход из игры
+                    pg.quit()
+                    raise SystemExit
 
 
 def main():
@@ -181,7 +180,7 @@ def main():
         clock.tick(SPEED)
 
         # Обработка ввода пользователя
-        handle_keys(snake)
+        snake.handle_keys()
 
         # Движение змейки
         snake.move()
