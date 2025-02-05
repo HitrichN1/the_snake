@@ -136,8 +136,8 @@ class Snake(GameObject):
             return False
         return self.get_head_position() in self.positions[1:]
 
-    # Функция обработки действий пользователя
-    def handle_keys(self):
+# Функция обработки действий пользователя
+    def handle_keys(snake):
         """Обрабатывает нажатия клавиш."""
         global SPEED
         key_mapping = {
@@ -154,7 +154,7 @@ class Snake(GameObject):
             if event.type == pg.KEYDOWN:
                 if event.key in key_mapping:
                     new_direction = key_mapping[event.key]
-                    self.update_direction(new_direction)
+                    snake.update_direction(new_direction)
                 elif event.key == pg.K_PAGEUP:  # Увеличиваем скорость
                     SPEED += 1
                 elif event.key == pg.K_PAGEDOWN:  # Уменьшаем скорость
