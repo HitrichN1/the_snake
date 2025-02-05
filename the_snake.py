@@ -43,8 +43,9 @@ class GameObject:
     Определяет цвет и позицию объекта, а также метод его отрисовки.
     """
 
-    position = (0, 0)
-    body_color = (0, 0, 0)
+    def __init__(self, position=(0, 0), body_color=(0, 0, 0)):
+        self.position = position
+        self.body_color = body_color
 
     def draw(self, position, color=None):
         """Отрисовывает одну ячейку на поле."""
@@ -61,10 +62,10 @@ class Apple(GameObject):
     """
 
     def __init__(self, occupied_positions, color=APPLE_COLOR):
+        super().__init__(body_color=color)
         self.randomize_position(occupied_positions)
-        self.body_color = color
 
-    def randomize_position(self, occupied_positions=None):
+    def randomize_position(self, occupied_positions):
         """Перемещает яблоко в случайную позицию на поле."""
         while True:
             new_position = (
@@ -84,6 +85,7 @@ class Snake(GameObject):
     """
 
     def __init__(self, color=SNAKE_COLOR):
+        super().__init__(body_color=color)
         self.reset()
         self.body_color = color
         self.next_direction = self.direction
