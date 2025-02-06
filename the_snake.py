@@ -11,6 +11,9 @@ GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 # Константа центра экрана
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+# Константа начальной позиции
+POSITION = (0, 0)
+
 # Направления движения:
 UP = (0, -1)
 DOWN = (0, 1)
@@ -22,12 +25,33 @@ BOARD_BACKGROUND_COLOR = (165, 165, 165)
 BORDER_COLOR = (93, 216, 228)
 APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
+BODY_COLOR = (0, 0, 0)
+
+# Константа ячеек поля
+ALL_CELLS = set(
+    (x * GRID_SIZE, y * GRID_SIZE)
+    for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT)
+)
+
+KEY_MAPPING = {
+    pg.K_UP: UP,
+    pg.K_DOWN: DOWN,
+    pg.K_LEFT: LEFT,
+    pg.K_RIGHT: RIGHT
+}
 
 # Скорость движения змейки:
-SPEED = 10
+snake_speed = 10
 
 # Рекорд длины змейки
 high_score = 0
+
+# Обновляем заголовок с текущей скоростью
+pg.display.set_caption(f'Змейка'
+                       f' | Рекорд: {high_score} |'
+                       f' Скорость: {snake_speed}'
+                       f' (Pg.Up +, Pg.Dn -)'
+                       f' | ESC - выйти')
 
 # Настройка игрового окна:
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -43,14 +67,13 @@ class GameObject:
     Определяет цвет и позицию объекта, а также метод его отрисовки.
     """
 
-    position = (0, 0)
-    body_color = (0, 0, 0)
+    def __init__(self, color=BODY_COLOR):
+        self.body_color = color
+        self.position = POSITION
 
-    def draw(self, position, color=None):
-        """Отрисовывает одну ячейку на поле."""
-        color = color if color else self.body_color
-        rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
-        pg.draw.rect(screen, color, rect)
+    def draw_cell(self):
+        rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
@@ -64,18 +87,12 @@ class Apple(GameObject):
         self.body_color = color
         if occupied_positions is None:
             occupied_positions = set()
-        self.position = self.randomize_position(occupied_positions)
+        self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_positions):
         """Перемещает яблоко в случайную позицию на поле."""
-        while True:
-            new_position = (
-                random.randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                random.randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-            )
-            if new_position not in occupied_positions:
-                self.position = new_position
-                return self.position
+        self.position = random.choice(tuple(ALL_CELLS
+                                            - set(occupied_positions)))
 
 
 class Snake(GameObject):
@@ -86,9 +103,8 @@ class Snake(GameObject):
     """
 
     def __init__(self, color=SNAKE_COLOR):
+        super().__init__(color)
         self.reset()
-        self.body_color = color
-        self.next_direction = self.direction
 
     def get_head_position(self):
         """Возвращает позицию головы змейки."""
@@ -96,33 +112,32 @@ class Snake(GameObject):
 
     def reset(self):
         """Сбрасывает состояние змейки."""
-        # Начальная позиция
         self.positions = [SCREEN_CENTER]
-        # Начальное направление
         self.direction = RIGHT
-        # Последний сегмент змейки
         self.last = None
-        # Возвращаем длину змейки
         self.length = 1
 
     # Метод draw класса Snake
-    def draw(self):
+    def draw_snake(self):
         """Отрисовывает змейку на экране."""
-        for position in self.positions:
-            GameObject.draw(self, position, self.body_color)
+        self.position = self.get_head_position()
+        self.draw_cell()
+        if self.last:
+            pg.draw.rect(screen, BOARD_BACKGROUND_COLOR,
+                         pg.Rect(self.last, (GRID_SIZE, GRID_SIZE)))
 
     def update_direction(self, new_direction=None):
         """Обновляет направление змейки."""
         if new_direction:
             # Проверяем, чтобы змейка не могла развернуться назад
-            if new_direction[0] != -self.direction[0]:
-                self.next_direction = new_direction
+            if (self.direction == UP and new_direction != DOWN) or \
+               (self.direction == DOWN and new_direction != UP) or \
+               (self.direction == LEFT and new_direction != RIGHT) or \
+               (self.direction == RIGHT and new_direction != LEFT):
+                self.direction = new_direction
 
     def move(self):
         """Обновляет позицию змейки."""
-        # Без строчки с self.next.directon при быстром нажатии вверх
-        # или вниз и в противоположную сторону змейка может развернуться
-        self.direction = self.next_direction
         head_x, head_y = self.get_head_position()
         direction_x, direction_y = self.direction
         self.positions.insert(0, (
@@ -130,39 +145,27 @@ class Snake(GameObject):
             (head_y + direction_y * GRID_SIZE) % SCREEN_HEIGHT
         ))
         if len(self.positions) > self.length:
-            self.positions.pop()
+            self.last = self.positions.pop()
 
     def check_collision(self):
         """Проверяет столкновение змейки с самой собой."""
-        if self.length < 4:  # Минимальная длина для столкновения с собой
-            return False
-        return self.get_head_position() in self.positions[1:]
+        return self.length > 4 and self.get_head_position() in \
+            self.positions[4:]
 
 
 # Функция обработки действий пользователя
 def handle_keys(snake):
     """Обрабатывает нажатия клавиш."""
-    global SPEED
-    key_mapping = {
-        pg.K_UP: UP,
-        pg.K_DOWN: DOWN,
-        pg.K_LEFT: LEFT,
-        pg.K_RIGHT: RIGHT
-    }
-
+    global snake_speed
     for event in pg.event.get():
-        if event.type == pg.QUIT:
-            pg.quit()
-            raise SystemExit
         if event.type == pg.KEYDOWN:
-            if event.key in key_mapping:
-                new_direction = key_mapping[event.key]
-                snake.update_direction(new_direction)
+            if event.key in KEY_MAPPING:
+                snake.update_direction(KEY_MAPPING[event.key])
             elif event.key == pg.K_PAGEUP:  # Увеличиваем скорость
-                SPEED += 1
+                snake_speed += 1
             elif event.key == pg.K_PAGEDOWN:  # Уменьшаем скорость
-                SPEED = max(1, SPEED - 1)  # Минимальная скорость 1
-            elif event.key == pg.K_ESCAPE:  # Выход из игры
+                snake_speed = max(1, snake_speed - 1)  # Минимальная скорость 1
+            elif event.key == pg.K_ESCAPE:
                 pg.quit()
                 raise SystemExit
 
@@ -172,15 +175,24 @@ def main():
     Основная функция игры.
     Инициализирует игру и запускает основной игровой цикл.
     """
-    global SPEED, high_score
+    global snake_speed, high_score
     # Инициализация PyGame:
     pg.init()
-    # Тут нужно создать экземпляры классов
+
+    # Устанавливаем фон
+    screen.fill(BOARD_BACKGROUND_COLOR)
+
+    # Переменные для отслеживания изменений
+    new_high_score = high_score
+    new_snake_speed = snake_speed
+
+    # Создаём экземпляры классов
     snake = Snake()
-    apple = Apple(set(snake.positions))
+    apple = Apple(snake.positions)
+
     # Основной цикл
     while True:
-        clock.tick(SPEED)
+        clock.tick(snake_speed)
 
         # Обработка ввода пользователя
         handle_keys(snake)
@@ -188,33 +200,37 @@ def main():
         # Движение змейки
         snake.move()
 
+        # Отрисовка объектов.
+        apple.draw_cell()
+        snake.draw_snake()
+        pg.display.update()
+
+        # Обновляем заголовок только если изменились значения
+        if high_score != new_high_score or snake_speed != new_snake_speed:
+            pg.display.set_caption(f'Змейка'
+                                   f' | Рекорд: {high_score} |'
+                                   f' Скорость: {snake_speed}'
+                                   f' (Pg.Up +, Pg.Dn -)'
+                                   f' | ESC - выйти')
+            new_high_score = high_score
+            new_snake_speed = snake_speed
+
         # Проверка, съела ли змейка яблоко
-        if snake.positions[0] == apple.position:
+        if snake.get_head_position() == apple.position:
             # Увеличивает длину змейки
             snake.length += 1
             # Перемещаем яблоко с учетом занятых позиций
-            apple.randomize_position(set(snake.positions))
+            apple.randomize_position(snake.positions)
+            continue
 
         # Проверка столкновения с собой
         if snake.check_collision():
+            screen.fill(BOARD_BACKGROUND_COLOR)
             # Обновляем рекорд, если текущая длина больше
             if snake.length > high_score:
                 high_score = snake.length
             snake.reset()
-            apple.randomize_position(set(snake.positions))
-
-        # Обновляем заголовок с рекордом и текущей скоростью
-        pg.display.set_caption(f'Змейка'
-                               f' | Рекорд: {high_score} |'
-                               f' Скорость: {SPEED}'
-                               f' (Pg.Up +, Pg.Dn -)'
-                               f' | ESC - выйти')
-
-        # Отрисовка объектов.
-        screen.fill(BOARD_BACKGROUND_COLOR)
-        apple.draw(apple.position)
-        snake.draw()
-        pg.display.update()
+            apple.randomize_position(snake.positions)
 
 
 if __name__ == '__main__':
