@@ -71,7 +71,7 @@ class GameObject:
         self.body_color = color
         self.position = POSITION
 
-    def draw_cell(self):
+    def draw(self):
         """Рисует одну ячейку."""
         rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, rect)
@@ -122,7 +122,7 @@ class Snake(GameObject):
     def draw_snake(self):
         """Отрисовывает змейку на экране."""
         self.position = self.get_head_position()
-        self.draw_cell()
+        self.draw()
         if self.last:
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR,
                          pg.Rect(self.last, (GRID_SIZE, GRID_SIZE)))
@@ -202,7 +202,7 @@ def main():
         snake.move()
 
         # Отрисовка объектов.
-        apple.draw_cell()
+        apple.draw()
         snake.draw_snake()
         pg.display.update()
 
