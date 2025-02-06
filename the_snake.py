@@ -72,6 +72,7 @@ class GameObject:
         self.position = POSITION
 
     def draw_cell(self):
+        """Рисует одну ячейку."""
         rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
@@ -84,7 +85,7 @@ class Apple(GameObject):
     """
 
     def __init__(self, occupied_positions=None, color=APPLE_COLOR):
-        self.body_color = color
+        super().__init__(color)
         if occupied_positions is None:
             occupied_positions = set()
         self.randomize_position(occupied_positions)
