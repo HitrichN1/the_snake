@@ -84,7 +84,7 @@ class Apple(GameObject):
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
 
-    def __init__(self, occupied_positions=None, color=APPLE_COLOR):
+    def __init__(self, occupied_positions=DEFAULT_POSITION, color=APPLE_COLOR):
         super().__init__(color)
         self.randomize_position(occupied_positions)
 
