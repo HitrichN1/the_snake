@@ -24,6 +24,9 @@ APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
 BODY_COLOR = (0, 0, 0)
 
+# Константа дефолтной позиции
+DEFAULT_POSITION = (0, 0)
+
 # Константа ячеек поля
 ALL_CELLS = set(
     (x * GRID_SIZE, y * GRID_SIZE)
@@ -59,6 +62,7 @@ class GameObject:
 
     def __init__(self, color=BODY_COLOR):
         self.body_color = color
+        self.position = DEFAULT_POSITION
 
     def draw_cell(self, position, color=None):
         """Рисует одну ячейку."""
@@ -80,9 +84,10 @@ class Apple(GameObject):
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
 
-    def __init__(self, occupied_positions, color=APPLE_COLOR):
+    def __init__(self, occupied_positions=None, color=APPLE_COLOR):
         super().__init__(color)
-        occupied_positions = set()
+        if occupied_positions is None:
+            occupied_positions = set()
         self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_positions):
