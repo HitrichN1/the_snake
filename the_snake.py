@@ -17,12 +17,24 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
+# Словарь противоположных направлений
+OPPOSITE_DIRECTIONS = {
+    UP: DOWN,
+    DOWN: UP,
+    LEFT: RIGHT,
+    RIGHT: LEFT
+}
+
 # Цветовые константы:
 BOARD_BACKGROUND_COLOR = (165, 165, 165)
 BORDER_COLOR = (93, 216, 228)
 APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
 BODY_COLOR = (0, 0, 0)
+
+# Константы минимальной и максимальной скорости
+MIN_SNAKE_SPEED = 1
+MAX_SNAKE_SPEED = 99
 
 # Константа дефолтной позиции
 DEFAULT_POSITION = (0, 0)
@@ -66,8 +78,7 @@ class GameObject:
 
     def draw_cell(self, position, color=None):
         """Рисует одну ячейку."""
-        if color is None:
-            color = self.body_color
+        color = color or self.body_color
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, color, rect)
         if color != BOARD_BACKGROUND_COLOR:
@@ -75,7 +86,6 @@ class GameObject:
 
     def draw(self):
         """Пустой метод."""
-        pass
 
 
 class Apple(GameObject):
@@ -84,8 +94,9 @@ class Apple(GameObject):
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
 
-    def __init__(self, occupied_positions=DEFAULT_POSITION, color=APPLE_COLOR):
+    def __init__(self, occupied_positions, color=APPLE_COLOR):
         super().__init__(color)
+        occupied_positions = set(occupied_positions)
         self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_positions):
@@ -130,10 +141,7 @@ class Snake(GameObject):
     def update_direction(self, new_direction):
         """Обновляет направление змейки."""
         # Проверяем, чтобы змейка не могла развернуться назад
-        if ((self.direction == UP and new_direction != DOWN)
-           or (self.direction == DOWN and new_direction != UP)
-           or (self.direction == LEFT and new_direction != RIGHT)
-           or (self.direction == RIGHT and new_direction != LEFT)):
+        if new_direction != OPPOSITE_DIRECTIONS.get(self.direction):
             self.direction = new_direction
 
     def move(self):
@@ -144,9 +152,8 @@ class Snake(GameObject):
             (head_x + direction_x * GRID_SIZE) % SCREEN_WIDTH,
             (head_y + direction_y * GRID_SIZE) % SCREEN_HEIGHT
         ))
-        if len(self.positions) > self.length:
-            self.last = self.positions[-1]
-            self.positions.pop()
+        self.last = (self.positions.pop()
+                     if len(self.positions) > self.length else None)
 
     def check_collision(self):
         """Проверяет столкновение змейки с самой собой."""
@@ -163,10 +170,10 @@ def handle_keys(snake):
             if event.key in KEY_MAPPING:
                 snake.update_direction(KEY_MAPPING[event.key])
             elif event.key == pg.K_PAGEUP:
-                snake_speed = min(20, snake_speed + 1)
+                snake_speed = min(MAX_SNAKE_SPEED, snake_speed + 1)
                 update_caption()
             elif event.key == pg.K_PAGEDOWN:
-                snake_speed = max(1, snake_speed - 1)
+                snake_speed = max(MIN_SNAKE_SPEED, snake_speed - 1)
                 update_caption()
             elif event.key == pg.K_ESCAPE:
                 pg.quit()
@@ -190,25 +197,16 @@ def main():
     Инициализирует игру и запускает основной игровой цикл.
     """
     global snake_speed, high_score
-    # Инициализация PyGame:
     pg.init()
-    # Устанавливаем фон
     screen.fill(BOARD_BACKGROUND_COLOR)
-    # Создаём экземпляры классов
     snake = Snake()
     apple = Apple(snake.positions)
-    # Обновление заголовка
     update_caption()
 
-    # Основной цикл
     while True:
         clock.tick(snake_speed)
-        # Обработка ввода пользователя
         handle_keys(snake)
-        # Движение змейки
         snake.move()
-        # Флаг, указывающий, было ли съедено яблоко
-        apple_eaten = False
 
         # Проверка, съела ли змейка яблоко
         if snake.get_head_position() == apple.position:
@@ -216,14 +214,14 @@ def main():
             snake.length += 1
             # Перемещаем яблоко с учетом занятых позиций
             apple.randomize_position(snake.positions)
-            apple_eaten = True
 
         # Проверка столкновения с собой
-        if not apple_eaten and snake.check_collision():
+        elif snake.check_collision():
             screen.fill(BOARD_BACKGROUND_COLOR)
             # Обновляем рекорд, если текущая длина больше
             high_score = max(high_score, snake.length)
-            update_caption()
+            if high_score == snake.length:
+                update_caption()
             snake.reset()
             apple.randomize_position(snake.positions)
 
