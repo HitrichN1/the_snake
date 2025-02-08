@@ -65,7 +65,6 @@ screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 clock = pg.time.Clock()
 
 
-# Тут опишите все классы игры.
 class GameObject:
     """
     Базовый класс для игровых объектов.
@@ -94,9 +93,8 @@ class Apple(GameObject):
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
 
-    def __init__(self, occupied_positions=None, color=APPLE_COLOR):
+    def __init__(self, occupied_positions=set(), color=APPLE_COLOR):
         super().__init__(color)
-        occupied_positions = occupied_positions or SCREEN_CENTER
         self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_positions):
@@ -140,8 +138,7 @@ class Snake(GameObject):
 
     def update_direction(self, new_direction):
         """Обновляет направление змейки."""
-        # Проверяем, чтобы змейка не могла развернуться назад
-        if new_direction != OPPOSITE_DIRECTIONS.get(self.direction):
+        if new_direction != OPPOSITE_DIRECTIONS[self.direction]:
             self.direction = new_direction
 
     def move(self):
@@ -210,15 +207,12 @@ def main():
 
         # Проверка, съела ли змейка яблоко
         if snake.get_head_position() == apple.position:
-            # Увеличивает длину змейки
             snake.length += 1
-            # Перемещаем яблоко с учетом занятых позиций
             apple.randomize_position(snake.positions)
 
         # Проверка столкновения с собой
         elif snake.check_collision():
             screen.fill(BOARD_BACKGROUND_COLOR)
-            # Обновляем рекорд, если текущая длина больше
             high_score = max(high_score, snake.length)
             if high_score == snake.length:
                 update_caption()
