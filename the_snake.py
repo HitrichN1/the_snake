@@ -93,7 +93,7 @@ class Apple(GameObject):
     Яблоко появляется в случайной позиции и может быть съедено змейкой.
     """
 
-    def __init__(self, occupied_positions=set(), color=APPLE_COLOR):
+    def __init__(self, occupied_positions=(), color=APPLE_COLOR):
         super().__init__(color)
         self.randomize_position(occupied_positions)
 
@@ -129,7 +129,6 @@ class Snake(GameObject):
         self.last = None
         self.length = 1
 
-    # Метод draw класса Snake
     def draw(self):
         """Отрисовывает змейку на экране."""
         self.draw_cell(self.get_head_position())
@@ -158,7 +157,6 @@ class Snake(GameObject):
                 self.positions[4:])
 
 
-# Функция обработки действий пользователя
 def handle_keys(snake):
     """Обрабатывает нажатия клавиш."""
     global snake_speed
